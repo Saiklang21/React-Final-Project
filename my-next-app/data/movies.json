@@ -1,0 +1,26 @@
+[
+  {
+    "id": "m1",
+    "title": "Galactic Drift",
+    "genre": "Sci-Fi",
+    "posterUrl": "/posters/galactic-drift.jpg",
+    "rating": 8.1,
+    "description": "ลูกเรือยานอวกาศต้องเอาชีวิตรอดหลังหลงเข้าไปในมิติที่ไม่รู้จัก"
+  },
+  {
+    "id": "m2",
+    "title": "The Last Recipe",
+    "genre": "Drama",
+    "posterUrl": "/posters/the-last-recipe.jpg",
+    "rating": 7.4,
+    "description": "เชฟหนุ่มตามหาสูตรอาหารลับของครอบครัวก่อนร้านจะถูกปิดตัวลง"
+  },
+  {
+    "id": "m3",
+    "title": "Midnight Pursuit",
+    "genre": "Action",
+    "posterUrl": "/posters/midnight-pursuit.jpg",
+    "rating": 6.9,
+    "description": "นักสืบต้องไล่ล่าคนร้ายข้ามเมืองภายในคืนเดียวก่อนหลักฐานจะหายไป"
+  }
+]

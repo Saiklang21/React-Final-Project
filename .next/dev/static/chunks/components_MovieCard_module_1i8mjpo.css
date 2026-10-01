@@ -1,0 +1,51 @@
+/* [project]/components/MovieCard.module.css [app-client] (css) */
+.MovieCard-module__IsXVua__card {
+  color: inherit;
+  background: var(--surface);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: transform .15s;
+  display: block;
+  overflow: hidden;
+}
+
+.MovieCard-module__IsXVua__card:hover {
+  transform: translateY(-4px);
+}
+
+.MovieCard-module__IsXVua__poster {
+  aspect-ratio: 2 / 3;
+  align-items: flex-end;
+  padding: 1rem;
+  display: flex;
+}
+
+.MovieCard-module__IsXVua__posterTitle {
+  font-family: var(--font-display), sans-serif;
+  text-shadow: 0 2px 8px #0009;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.MovieCard-module__IsXVua__info {
+  padding: .75rem 1rem 1rem;
+}
+
+.MovieCard-module__IsXVua__title {
+  margin: 0 0 .35rem;
+  font-size: 1rem;
+}
+
+.MovieCard-module__IsXVua__meta {
+  color: var(--text-dim);
+  justify-content: space-between;
+  font-size: .85rem;
+  display: flex;
+}
+
+.MovieCard-module__IsXVua__rating {
+  color: var(--gold);
+}
+
+/*# sourceMappingURL=components_MovieCard_module_1i8mjpo.css.map*/
