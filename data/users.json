@@ -4,5 +4,30 @@
     "email": "dsa@dsa",
     "password": "$2b$10$v2ANWQ4DluaqjyOsuFEEf.NXtlTP2kv8HvE9ypTzuNo5a8NbbUOuu",
     "name": "dsa"
+  },
+  {
+    "id": "usr-frame-demo",
+    "email": "frame@cinemago.com",
+    "password": "$2b$10$cO/ergdYHTqPbVlVHCs0qOqXXz4pkA1EBL65NtVpukBU1sILiV8PS",
+    "name": "จิรัฎฐ์ วงค์กาสิทธิ์ (เฟรม)",
+    "phone": "089-123-4567"
+  },
+  {
+    "id": "usr-bank-demo",
+    "email": "bank@cinemago.com",
+    "password": "$2b$10$6NH9hhHQ1PLrimlyAt9gBu1fHCtbiUfSn1Njlht9n6.6dSkHQm4f6",
+    "name": "สายกลาง จะวะนะ (แบงค์)"
+  },
+  {
+    "id": "a5b66138-93cc-487a-84ec-50e882316b41",
+    "email": "test@cinemago.com",
+    "password": "$2b$10$4UjAPNfWJ81Kf9HNco5E9u9YRwwQ52UYv.Hnaunb5r0wta3drUygm",
+    "name": "Test User"
+  },
+  {
+    "id": "d6912d88-a435-4038-8f99-24d067121bcf",
+    "email": "example@example.com",
+    "password": "$2b$10$QKnd9jzFAF5SPyQZX9Jk8eYLxLS9nxxSIdnYoA5EPMGbqRBGBZsxy",
+    "name": "FF"
   }
 ]

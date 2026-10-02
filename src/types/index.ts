@@ -75,6 +75,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  password?: string; // bcrypt hash — เฉพาะฝั่งเซิร์ฟเวอร์เท่านั้น (มาจาก Part A)
   phone?: string;
   avatar?: string;
 }

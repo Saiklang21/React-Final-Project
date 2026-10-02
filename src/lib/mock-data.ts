@@ -1,4 +1,4 @@
-import { Movie, Showtime, Seat, Booking, User, SeatType } from '@/types';
+import { Movie, Showtime, Seat, Booking, SeatType } from '@/types';
 
 // Helper to generate realistic seats for a theater
 export function generateTheaterSeats(): Seat[] {
@@ -163,10 +163,4 @@ export const INITIAL_BOOKINGS: Booking[] = [
   }
 ];
 
-export const DEMO_USER: User = {
-  id: 'usr-frame',
-  name: 'Frame Jirath',
-  email: 'frame@cinemago.com',
-  phone: '081-234-5678',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
-};
+// (เดโม login แบบเขียนคุกกี้เองถูกแทนที่ด้วยระบบ register/login จริงของ Part A — ดูที่ src/lib/actions/auth.ts)

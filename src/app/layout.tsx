@@ -18,15 +18,19 @@ export const metadata: Metadata = {
 };
 
 import Navbar from "@/components/Navbar";
+import { getCurrentUser } from "@/lib/auth";
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // อ่าน session จริงจากคุกกี้ session_userId (ระบบ login ของ Part A)
+  const user = await getCurrentUser();
+
   return (
     <html
       lang="th"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col bg-neutral-950 text-neutral-100">
-        <Navbar />
+        <Navbar user={user ? { name: user.name, email: user.email } : null} />
         <div className="flex-1">{children}</div>
       </body>
     </html>

@@ -86,9 +86,17 @@ export default function HomePage() {
                       </div>
 
                       <h3 className="text-xl font-black text-white group-hover:text-amber-400 transition-colors">
-                        {movie.title}
+                        <Link href={`/movies/${movie.id}`} className="hover:text-amber-400 transition-colors">
+                          {movie.title}
+                        </Link>
                       </h3>
                       <p className="text-xs text-neutral-400 line-clamp-2">{movie.synopsis}</p>
+                      <Link
+                        href={`/movies/${movie.id}`}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
+                      >
+                        ดูรายละเอียด & เลือกรอบฉาย <ChevronRight className="w-3.5 h-3.5" />
+                      </Link>
                     </div>
 
                     <div className="space-y-3 pt-3 border-t border-neutral-800/80">

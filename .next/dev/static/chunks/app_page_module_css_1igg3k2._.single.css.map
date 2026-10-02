@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/app/page.module.css"],"sourcesContent":["/* app/page.module.css */\r\n.main {\r\n  max-width: 1100px;\r\n  margin: 0 auto;\r\n  padding: 2rem 1.5rem;\r\n}\r\n\r\n.heading {\r\n  font-size: 2rem;\r\n  margin-bottom: 1.5rem;\r\n}\r\n\r\n.grid {\r\n  display: grid;\r\n  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));\r\n  gap: 1.25rem;\r\n}"],"names":[],"mappings":"AACA;;;;;;AAMA;;;;;AAKA"}}]
-}

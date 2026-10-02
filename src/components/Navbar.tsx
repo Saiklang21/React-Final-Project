@@ -1,43 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Film, User, LogIn, LogOut, Ticket, Sparkles } from 'lucide-react';
-import { AUTH_COOKIE_NAME } from '@/lib/auth-constants';
+import { Film, LogIn, LogOut, Ticket, Sparkles, UserPlus } from 'lucide-react';
+import { logoutAction } from '@/lib/actions/auth';
 
-export default function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('');
+interface NavbarProps {
+  // ได้รับมาจาก server layout (src/app/layout.tsx) — อ่านจากคุกกี้ session_userId จริง
+  user: { name: string; email: string } | null;
+}
 
-  useEffect(() => {
-    // Check if session cookie exists
-    const hasCookie = document.cookie.includes(AUTH_COOKIE_NAME);
-    setIsLoggedIn(hasCookie);
-    if (hasCookie) {
-      setUserName('Frame (เฟรม)');
-    }
-  }, []);
-
-  const handleLoginToggle = () => {
-    if (isLoggedIn) {
-      // Logout
-      document.cookie = `${AUTH_COOKIE_NAME}=; path=/; max-age=0`;
-      setIsLoggedIn(false);
-      window.location.reload();
-    } else {
-      // Login as Frame demo
-      const user = {
-        id: 'usr-frame',
-        name: 'Frame Jirath',
-        email: 'frame@cinemago.com',
-      };
-      document.cookie = `${AUTH_COOKIE_NAME}=${encodeURIComponent(JSON.stringify(user))}; path=/; max-age=86400`;
-      setIsLoggedIn(true);
-      setUserName('Frame (เฟรม)');
-      window.location.reload();
-    }
-  };
-
+export default function Navbar({ user }: NavbarProps) {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-neutral-950/85 border-b border-neutral-800/80 shadow-2xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -61,7 +33,7 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Quick Nav & Showtime link */}
+        {/* Quick Nav */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-neutral-300">
           <Link href="/" className="hover:text-amber-400 transition-colors flex items-center gap-1.5">
             <Film className="w-4 h-4" /> ภาพยนตร์ทั้งหมด
@@ -76,32 +48,45 @@ export default function Navbar() {
 
         {/* Auth / Profile Bar */}
         <div className="flex items-center gap-3">
-          {isLoggedIn ? (
+          {user ? (
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-900 border border-neutral-700/60 text-xs text-neutral-200">
-                <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-[10px] font-bold text-white">
-                  F
-                </div>
-                <span>{userName}</span>
-              </div>
-              <button
-                onClick={handleLoginToggle}
-                className="px-3 py-1.5 text-xs font-medium text-neutral-400 hover:text-red-400 hover:bg-neutral-900/80 rounded-lg border border-neutral-800 transition-all flex items-center gap-1.5 cursor-pointer"
-                title="คลิกเพื่อออกจากระบบ"
+              <Link
+                href="/my-ticket"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-900 border border-neutral-700/60 text-xs text-neutral-200 hover:border-amber-500/60 transition-colors"
+                title={user.email}
               >
-                <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">ออกจากระบบ</span>
-              </button>
+                <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-[10px] font-bold text-white">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="hidden sm:inline">{user.name}</span>
+              </Link>
+              <form action={logoutAction}>
+                <button
+                  type="submit"
+                  className="px-3 py-1.5 text-xs font-medium text-neutral-400 hover:text-red-400 hover:bg-neutral-900/80 rounded-lg border border-neutral-800 transition-all flex items-center gap-1.5 cursor-pointer"
+                  title="ออกจากระบบ"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">ออกจากระบบ</span>
+                </button>
+              </form>
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <button
-                onClick={handleLoginToggle}
-                className="px-4 py-2 text-xs font-semibold text-neutral-950 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-300 hover:to-rose-300 rounded-lg shadow-lg shadow-amber-500/20 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
+              <Link
+                href="/login"
+                className="px-4 py-2 text-xs font-semibold text-neutral-200 bg-neutral-900 hover:bg-neutral-800 rounded-lg border border-neutral-700/60 transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <LogIn className="w-3.5 h-3.5" />
-                <span>จำลองเข้าสู่ระบบ (Auth)</span>
-              </button>
+                <span>เข้าสู่ระบบ</span>
+              </Link>
+              <Link
+                href="/register"
+                className="px-4 py-2 text-xs font-semibold text-neutral-950 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-300 hover:to-rose-300 rounded-lg shadow-lg shadow-amber-500/20 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>สมัครสมาชิก</span>
+              </Link>
             </div>
           )}
         </div>
