@@ -1,0 +1,30 @@
+:root {
+  --bg: #23b9ff;
+  --surface: #d79999;
+  --surface-raised: #eef7fb;
+  --accent: #b3122e;
+  --gold: #c9971f;
+  --text: #1a1a1e;
+  --text-dim: #5c5c63;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display), sans-serif;
+  letter-spacing: 0.02em;
+}
+
+a {
+  color: inherit;
+}

@@ -1,0 +1,58 @@
+/* components/MovieCard.module.css — แทนที่ทั้งไฟล์ */
+.card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  perspective: 800px;
+}
+
+.poster {
+  aspect-ratio: 2 / 3;
+  display: flex;
+  align-items: flex-end;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    0 8px 16px rgba(0, 0, 0, 0.4),
+    0 16px 32px rgba(0, 0, 0, 0.3);
+  transform: rotateX(0deg) rotateY(0deg) translateZ(0);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transform-style: preserve-3d;
+}
+
+.card:hover .poster {
+  transform: rotateX(4deg) rotateY(-6deg) translateZ(10px);
+  box-shadow:
+    -6px 10px 10px rgba(0, 0, 0, 0.4),
+    -10px 24px 28px rgba(0, 0, 0, 0.45),
+    -14px 40px 48px rgba(0, 0, 0, 0.35);
+}
+
+.posterTitle {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.info {
+  padding: 0.75rem 0.25rem 1rem;
+}
+
+.title {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.rating {
+  color: var(--gold);
+}
