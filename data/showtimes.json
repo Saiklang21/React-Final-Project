@@ -1,6 +1,0 @@
-[
-  { "id": "s1", "movieId": "m1", "date": "2026-10-15", "time": "13:00", "hallName": "Hall 1" },
-  { "id": "s2", "movieId": "m1", "date": "2026-10-15", "time": "18:30", "hallName": "Hall 1" },
-  { "id": "s3", "movieId": "m2", "date": "2026-10-15", "time": "16:00", "hallName": "Hall 2" },
-  { "id": "s4", "movieId": "m3", "date": "2026-10-16", "time": "20:00", "hallName": "Hall 3" }
-]
