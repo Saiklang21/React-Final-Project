@@ -137,7 +137,7 @@ export const INITIAL_BOOKINGS: Booking[] = [
     id: 'BK-98231',
     userId: 'usr-1',
     userName: 'จิรัฎฐ์ วงค์กาสิทธิ์',
-    userEmail: 'frame.jirath@cinemago.com',
+    userEmail: 'example@cinemago.com',
     userPhone: '089-123-4567',
     showtimeId: 'st-101',
     movie: {

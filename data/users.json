@@ -13,6 +13,12 @@
     "phone": "089-123-4567"
   },
   {
+    "id": "usr-example-demo",
+    "email": "example@cinemago.com",
+    "password": "$2b$10$/h5JHjeCBdkxsKKP4f08XOH2h0lIhak1Ykw1iieg3rPDK7zrRX6cO",
+    "name": "Demo User"
+  },
+  {
     "id": "usr-bank-demo",
     "email": "bank@cinemago.com",
     "password": "$2b$10$6NH9hhHQ1PLrimlyAt9gBu1fHCtbiUfSn1Njlht9n6.6dSkHQm4f6",

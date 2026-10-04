@@ -155,7 +155,7 @@ export async function getBookingById(bookingId: string): Promise<Booking | null>
     id: bookingId,
     userId: 'usr-frame',
     userName: 'จิรัฎฐ์ วงค์กาสิทธิ์ (คุณเฟรม)',
-    userEmail: 'frame@cinemago.com',
+    userEmail: 'example@cinemago.com',
     userPhone: '089-123-4567',
     showtimeId: 'st-101',
     movie: {

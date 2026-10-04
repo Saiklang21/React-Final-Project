@@ -50,7 +50,7 @@ export default function CheckoutForm() {
 
   // Form State
   const [customerName, setCustomerName] = useState('คุณจิรัฎฐ์ วงค์กาสิทธิ์');
-  const [customerEmail, setCustomerEmail] = useState('frame.dev@cinemago.com');
+  const [customerEmail, setCustomerEmail] = useState('example@cinemago.com');
   const [customerPhone, setCustomerPhone] = useState('089-123-4567');
   const [paymentMethod, setPaymentMethod] = useState<'promptpay' | 'credit_card' | 'truemoney'>('promptpay');
   const [promoCode, setPromoCode] = useState('');

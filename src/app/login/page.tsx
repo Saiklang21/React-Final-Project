@@ -27,7 +27,7 @@ function LoginForm() {
             id="email"
             name="email"
             type="email"
-            defaultValue="frame@cinemago.com"
+            defaultValue="example@cinemago.com"
             required
             className="w-full pl-10 pr-4 py-3 rounded-xl bg-neutral-950 border border-neutral-800 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-amber-400"
             placeholder="name@example.com"
@@ -80,7 +80,7 @@ function LoginForm() {
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
           <span>ตรวจสอบสิทธิ์ผ่าน Next.js Middleware</span>
         </span>
-        <span className="text-neutral-500">เดโม: frame@cinemago.com / 123456</span>
+        <span className="text-neutral-500">เดโม: example@cinemago.com / 123456</span>
       </div>
     </form>
   );
