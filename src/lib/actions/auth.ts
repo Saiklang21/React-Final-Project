@@ -9,6 +9,7 @@ import {
   findUserByEmail,
   hashPassword,
   verifyPassword,
+  StorageError,
 } from '@/lib/auth';
 import { AUTH_COOKIE_NAME } from '@/lib/auth-constants';
 import { User } from '@/types';
@@ -27,6 +28,13 @@ function safeCallbackUrl(callbackUrl: string | null): string {
   return '/';
 }
 
+// แปลงข้อผิดพลาดที่ไม่คาดคิด (โดยเฉพาะฝั่ง storage) เป็นข้อความที่ผู้ใช้เห็นในฟอร์ม
+function actionErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof StorageError) return err.userMessage;
+  const detail = err instanceof Error ? err.message : String(err);
+  return `${fallback} (${detail})`;
+}
+
 export async function registerAction(
   _prevState: AuthFormState,
   formData: FormData
@@ -42,21 +50,29 @@ export async function registerAction(
     return { error: 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร' };
   }
 
-  const existingUser = await findUserByEmail(email);
-  if (existingUser) {
-    return { error: 'อีเมลนี้มีผู้ใช้งานแล้ว' };
+  try {
+    const users = await getUsers();
+    const emailExists = users.some(
+      (u) => u.email.trim().toLowerCase() === email.toLowerCase()
+    );
+    if (emailExists) {
+      return { error: 'อีเมลนี้มีผู้ใช้งานแล้ว' };
+    }
+
+    const newUser: User = {
+      id: crypto.randomUUID(),
+      email,
+      password: await hashPassword(password),
+      name,
+    };
+    users.push(newUser);
+    await saveUsers(users);
+  } catch (err) {
+    // เดิมพอ storage พัง (บน Vercel ไม่มี BLOB_READ_WRITE_TOKEN / Blob เขียนไม่ได้)
+    // action จะ throw แล้วฟอร์มค้างไม่มีอะไรเกิดขึ้น — เก็บ error มาโชว์ในฟอร์มแทน
+    console.error('[registerAction]', err);
+    return { error: actionErrorMessage(err, 'สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง') };
   }
-
-  const newUser: User = {
-    id: crypto.randomUUID(),
-    email,
-    password: await hashPassword(password),
-    name,
-  };
-
-  const users = await getUsers();
-  users.push(newUser);
-  await saveUsers(users);
 
   redirect('/login');
 }
@@ -73,18 +89,25 @@ export async function loginAction(
     return { error: 'กรอกข้อมูลให้ครบทุกช่อง' };
   }
 
-  const user = await findUserByEmail(email);
-  if (!user || !user.password) {
-    return { error: 'ไม่พบบัญชีผู้ใช้นี้' };
-  }
+  let sessionUserId = '';
+  try {
+    const user = await findUserByEmail(email);
+    if (!user || !user.password) {
+      return { error: 'ไม่พบบัญชีผู้ใช้นี้' };
+    }
 
-  const isValid = await verifyPassword(password, user.password);
-  if (!isValid) {
-    return { error: 'รหัสผ่านไม่ถูกต้อง' };
+    const isValid = await verifyPassword(password, user.password);
+    if (!isValid) {
+      return { error: 'รหัสผ่านไม่ถูกต้อง' };
+    }
+    sessionUserId = user.id;
+  } catch (err) {
+    console.error('[loginAction]', err);
+    return { error: actionErrorMessage(err, 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง') };
   }
 
   const cookieStore = await cookies();
-  cookieStore.set(AUTH_COOKIE_NAME, user.id, {
+  cookieStore.set(AUTH_COOKIE_NAME, sessionUserId, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
