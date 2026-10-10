@@ -35,5 +35,11 @@
     "email": "example@example.com",
     "password": "$2b$10$QKnd9jzFAF5SPyQZX9Jk8eYLxLS9nxxSIdnYoA5EPMGbqRBGBZsxy",
     "name": "FF"
+  },
+  {
+    "id": "11dc97d5-63f4-427d-942f-d060efbfd6f2",
+    "email": "test2@example.com",
+    "password": "$2b$10$VY6wHuHNwkmKr4QNLaQtmeMjv7Dz.give/LxKfpB/fcMlZhv2aLxK",
+    "name": "test2"
   }
 ]
