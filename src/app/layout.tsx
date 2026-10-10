@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
+import { AuthProvider } from "@/components/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,21 +19,19 @@ export const metadata: Metadata = {
   description: "จองตั๋วภาพยนตร์ออนไลน์ เลือกดูรอบฉายและเลือกที่นั่งได้สะดวกรวดเร็ว",
 };
 
-import Navbar from "@/components/Navbar";
-import { getCurrentUser } from "@/lib/auth";
-
-export default async function RootLayout({ children }: LayoutProps<"/">) {
-  // อ่าน session จริงจากคุกกี้ session_userId (ระบบ login ของ Part A)
-  const user = await getCurrentUser();
-
+// Server Component: layout ไม่อ่าน cookie แล้ว เพื่อให้หน้าต่าง ๆ เป็น static/ISR ได้
+// ข้อมูลผู้ใช้ที่ login อยู่ ให้ AuthProvider (Client Component) ดึงจาก /api/me แทน
+export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="th"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col bg-neutral-950 text-neutral-100">
-        <Navbar user={user ? { name: user.name, email: user.email } : null} />
-        <div className="flex-1">{children}</div>
+        <AuthProvider>
+          <Navbar />
+          <div className="flex-1">{children}</div>
+        </AuthProvider>
       </body>
     </html>
   );
