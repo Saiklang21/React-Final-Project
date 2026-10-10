@@ -2,6 +2,13 @@ import Link from 'next/link';
 import { INITIAL_MOVIES, INITIAL_SHOWTIMES } from '@/lib/mock-data';
 import { Film, Clock, Star, Ticket, Sparkles, ChevronRight, Play } from 'lucide-react';
 
+// ISR (Incremental Static Regeneration): หน้านี้ถูกสร้างเป็น static ล่วงหน้า
+// แล้วสร้างใหม่เบื้องหลังอย่างมากทุก 3600 วินาที (1 ชั่วโมง)
+// เหตุผล: รายชื่อหนังเปลี่ยนไม่บ่อยแต่เป็นหน้าที่คนเข้าเยอะที่สุด
+// จึงต้องการความเร็วแบบ static โดยไม่ต้อง build ใหม่ทุกครั้งที่ข้อมูลเปลี่ยน
+// (ไม่ใช้ SSR เพราะไม่จำเป็นต้องสดทุก request)
+export const revalidate = 3600;
+
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-100 py-10 px-4 sm:px-6 lg:px-8">

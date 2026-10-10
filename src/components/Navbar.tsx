@@ -1,15 +1,16 @@
 'use client';
+// Client Component: ใช้ useAuth() (Context) และ form action ของปุ่มออกจากระบบ
+// ข้อมูลผู้ใช้มาจาก AuthProvider ซึ่งดึงจาก /api/me ไม่ได้อ่านคุกกี้ที่ layout แล้ว
+// ทำให้ layout ไม่บังคับให้ทั้งแอป render ใหม่ทุก request (หน้า / จึงเป็น ISR ได้จริง)
 
 import Link from 'next/link';
 import { Film, LogIn, LogOut, Ticket, Sparkles, UserPlus } from 'lucide-react';
 import { logoutAction } from '@/lib/actions/auth';
+import { useAuth } from '@/components/AuthProvider';
 
-interface NavbarProps {
-  // ได้รับมาจาก server layout (src/app/layout.tsx) — อ่านจากคุกกี้ session_userId จริง
-  user: { name: string; email: string } | null;
-}
+export default function Navbar() {
+  const { user, loading } = useAuth();
 
-export default function Navbar({ user }: NavbarProps) {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-neutral-950/85 border-b border-neutral-800/80 shadow-2xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -48,7 +49,10 @@ export default function Navbar({ user }: NavbarProps) {
 
         {/* Auth / Profile Bar */}
         <div className="flex items-center gap-3">
-          {user ? (
+          {loading ? (
+            // เว้นที่ไว้ระหว่างรอ /api/me ตอบกลับ ป้องกันปุ่มกะพริบ
+            <div className="h-8 w-40" />
+          ) : user ? (
             <div className="flex items-center gap-3">
               <Link
                 href="/my-ticket"
