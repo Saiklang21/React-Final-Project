@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 
 import Navbar from "@/components/Navbar";
 import { getCurrentUser } from "@/lib/auth";
+import { BookingProvider } from "@/context/BookingContext";
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // อ่าน session จริงจากคุกกี้ session_userId (ระบบ login ของ Part A)
@@ -30,8 +31,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col bg-neutral-950 text-neutral-100">
-        <Navbar user={user ? { name: user.name, email: user.email } : null} />
-        <div className="flex-1">{children}</div>
+        <BookingProvider>
+          <Navbar user={user ? { name: user.name, email: user.email } : null} />
+          <div className="flex-1">{children}</div>
+        </BookingProvider>
       </body>
     </html>
   );

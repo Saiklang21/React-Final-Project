@@ -2,8 +2,24 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { createBookingAction } from '@/actions/booking';
 import { SeatType } from '@/types';
+import { useBooking } from '@/context/BookingContext';
+
+// Zod Schema สำหรับทำ Form Validation ฝั่ง Client
+// ตรงตาม Requirement ข้อ 6: "ฟอร์มที่ validate จริง (react-hook-form + zod)"
+const checkoutSchema = z.object({
+  customerName: z.string().min(1, 'กรุณากรอกชื่อ-นามสกุล'),
+  customerEmail: z.string().min(1, 'กรุณากรอกอีเมล').email('รูปแบบอีเมลไม่ถูกต้อง'),
+  customerPhone: z.string().min(1, 'กรุณากรอกเบอร์โทรศัพท์').refine((val) => val.replace(/\D/g, '').length >= 9, {
+    message: 'เบอร์โทรศัพท์ต้องมีอย่างน้อย 9-10 หลัก',
+  }),
+});
+
+type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 import {
   CreditCard,
   QrCode,
@@ -45,20 +61,30 @@ interface CheckoutData {
 
 export default function CheckoutForm() {
   const router = useRouter();
+  const { bookingState, clearBooking } = useBooking();
   const [data, setData] = useState<CheckoutData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Form State
-  const [customerName, setCustomerName] = useState('คุณจิรัฎฐ์ วงค์กาสิทธิ์');
-  const [customerEmail, setCustomerEmail] = useState('example@cinemago.com');
-  const [customerPhone, setCustomerPhone] = useState('089-123-4567');
+  // Form Setup ด้วย react-hook-form และ zodResolver
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CheckoutFormValues>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: {
+      customerName: 'คุณจิรัฎฐ์ วงค์กาสิทธิ์',
+      customerEmail: 'example@cinemago.com',
+      customerPhone: '089-123-4567',
+    },
+  });
+
   const [paymentMethod, setPaymentMethod] = useState<'promptpay' | 'credit_card' | 'truemoney'>('promptpay');
   const [promoCode, setPromoCode] = useState('');
   const [discount, setDiscount] = useState(0);
   const [promoApplied, setPromoApplied] = useState(false);
 
-  // Errors & Submit State
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  // Submit State
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -66,32 +92,36 @@ export default function CheckoutForm() {
   const [timeLeft, setTimeLeft] = useState(600);
 
   useEffect(() => {
-    // Load persisted checkout selection from sessionStorage
-    const stored = sessionStorage.getItem('cinemago_checkout');
-    if (stored) {
-      try {
-        setData(JSON.parse(stored));
-      } catch (err) {
-        console.error(err);
-      }
+    // โหลดข้อมูลจาก Global State (BookingContext) หรือ sessionStorage
+    if (bookingState) {
+      setData(bookingState);
     } else {
-      // Demo fallback data if visited directly
-      setData({
-        showtimeId: 'st-101',
-        movieId: 'm-1',
-        movieTitle: 'Dune: Part Two',
-        movieTitleTh: 'ดูน ภาคสอง',
-        moviePoster: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&auto=format&fit=crop&q=80',
-        hallName: 'Cinema 1 (IMAX)',
-        hallType: 'IMAX Laser',
-        dateTime: 'วันนี้, 19:30 น.',
-        audio: 'EN/TH',
-        seats: [
-          { id: 'C-5', row: 'C', number: 5, type: 'premium', price: 300 },
-          { id: 'C-6', row: 'C', number: 6, type: 'premium', price: 300 },
-        ],
-        totalPrice: 600,
-      });
+      const stored = sessionStorage.getItem('cinemago_checkout');
+      if (stored) {
+        try {
+          setData(JSON.parse(stored));
+        } catch (err) {
+          console.error(err);
+        }
+      } else {
+        // Demo fallback data if visited directly
+        setData({
+          showtimeId: 'st-101',
+          movieId: 'm-1',
+          movieTitle: 'Dune: Part Two',
+          movieTitleTh: 'ดูน ภาคสอง',
+          moviePoster: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&auto=format&fit=crop&q=80',
+          hallName: 'Cinema 1 (IMAX)',
+          hallType: 'IMAX Laser',
+          dateTime: 'วันนี้, 19:30 น.',
+          audio: 'EN/TH',
+          seats: [
+            { id: 'C-5', row: 'C', number: 5, type: 'premium', price: 300 },
+            { id: 'C-6', row: 'C', number: 6, type: 'premium', price: 300 },
+          ],
+          totalPrice: 600,
+        });
+      }
     }
     setLoading(false);
 
@@ -101,32 +131,12 @@ export default function CheckoutForm() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [bookingState]);
 
   const formatTimer = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const validate = () => {
-    const errs: { [key: string]: string } = {};
-    if (!customerName.trim()) {
-      errs.customerName = 'กรุณากรอกชื่อ-นามสกุล';
-    }
-    if (!customerEmail.trim()) {
-      errs.customerEmail = 'กรุณากรอกอีเมล';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
-      errs.customerEmail = 'รูปแบบอีเมลไม่ถูกต้อง';
-    }
-    if (!customerPhone.trim()) {
-      errs.customerPhone = 'กรุณากรอกเบอร์โทรศัพท์';
-    } else if (customerPhone.replace(/\D/g, '').length < 9) {
-      errs.customerPhone = 'เบอร์โทรศัพท์ต้องมีอย่างน้อย 9-10 หลัก';
-    }
-
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
   };
 
   const handleApplyPromo = () => {
@@ -141,13 +151,8 @@ export default function CheckoutForm() {
     }
   };
 
-  const handleConfirmBooking = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onValidSubmit = async (values: CheckoutFormValues) => {
     if (!data) return;
-
-    if (!validate()) {
-      return;
-    }
 
     setIsSubmitting(true);
     setServerError(null);
@@ -165,13 +170,14 @@ export default function CheckoutForm() {
       seats: data.seats,
       totalPrice: finalPrice,
       paymentMethod,
-      customerName,
-      customerEmail,
-      customerPhone,
+      customerName: values.customerName,
+      customerEmail: values.customerEmail,
+      customerPhone: values.customerPhone,
     });
 
     if (result.success && result.bookingId) {
-      // Clear session storage & navigate to confirmation page
+      // Clear Global state & session storage and navigate to confirmation page
+      clearBooking();
       sessionStorage.removeItem('cinemago_checkout');
       router.push(`/confirmation/${result.bookingId}`);
     } else {
@@ -205,7 +211,7 @@ export default function CheckoutForm() {
         </div>
       </div>
 
-      <form onSubmit={handleConfirmBooking} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <form onSubmit={handleSubmit(onValidSubmit)} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Customer Form & Payment Methods (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
           {/* Contact Information Card */}
@@ -227,11 +233,7 @@ export default function CheckoutForm() {
                 </label>
                 <input
                   type="text"
-                  value={customerName}
-                  onChange={(e) => {
-                    setCustomerName(e.target.value);
-                    if (errors.customerName) setErrors((prev) => ({ ...prev, customerName: '' }));
-                  }}
+                  {...register('customerName')}
                   placeholder="เช่น สมชาย ใจดี"
                   className={`w-full px-4 py-3 rounded-xl bg-neutral-950 border text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 transition-all ${
                     errors.customerName
@@ -240,7 +242,7 @@ export default function CheckoutForm() {
                   }`}
                 />
                 {errors.customerName && (
-                  <p className="text-rose-400 text-xs mt-1">{errors.customerName}</p>
+                  <p className="text-rose-400 text-xs mt-1">{errors.customerName.message}</p>
                 )}
               </div>
 
@@ -251,11 +253,7 @@ export default function CheckoutForm() {
                   </label>
                   <input
                     type="email"
-                    value={customerEmail}
-                    onChange={(e) => {
-                      setCustomerEmail(e.target.value);
-                      if (errors.customerEmail) setErrors((prev) => ({ ...prev, customerEmail: '' }));
-                    }}
+                    {...register('customerEmail')}
                     placeholder="example@mail.com"
                     className={`w-full px-4 py-3 rounded-xl bg-neutral-950 border text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 transition-all ${
                       errors.customerEmail
@@ -264,7 +262,7 @@ export default function CheckoutForm() {
                     }`}
                   />
                   {errors.customerEmail && (
-                    <p className="text-rose-400 text-xs mt-1">{errors.customerEmail}</p>
+                    <p className="text-rose-400 text-xs mt-1">{errors.customerEmail.message}</p>
                   )}
                 </div>
 
@@ -274,11 +272,7 @@ export default function CheckoutForm() {
                   </label>
                   <input
                     type="tel"
-                    value={customerPhone}
-                    onChange={(e) => {
-                      setCustomerPhone(e.target.value);
-                      if (errors.customerPhone) setErrors((prev) => ({ ...prev, customerPhone: '' }));
-                    }}
+                    {...register('customerPhone')}
                     placeholder="081-234-5678"
                     className={`w-full px-4 py-3 rounded-xl bg-neutral-950 border text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 transition-all ${
                       errors.customerPhone
@@ -287,7 +281,7 @@ export default function CheckoutForm() {
                     }`}
                   />
                   {errors.customerPhone && (
-                    <p className="text-rose-400 text-xs mt-1">{errors.customerPhone}</p>
+                    <p className="text-rose-400 text-xs mt-1">{errors.customerPhone.message}</p>
                   )}
                 </div>
               </div>

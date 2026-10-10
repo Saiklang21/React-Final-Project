@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Seat, Showtime, Movie } from '@/types';
+import { useBooking } from '@/context/BookingContext';
 import { Armchair, Sparkles, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck, Clock, MapPin, Film } from 'lucide-react';
 
 interface SeatSelectorProps {
@@ -12,6 +13,7 @@ interface SeatSelectorProps {
 
 export default function SeatSelector({ showtime, movie }: SeatSelectorProps) {
   const router = useRouter();
+  const { setBookingState } = useBooking();
   const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -48,7 +50,7 @@ export default function SeatSelector({ showtime, movie }: SeatSelectorProps) {
       return;
     }
 
-    // Persist selected booking in sessionStorage for checkout page
+    // Persist selected booking in Global State (BookingContext) and sessionStorage
     const checkoutData = {
       showtimeId: showtime.id,
       movieId: movie.id,
@@ -69,7 +71,7 @@ export default function SeatSelector({ showtime, movie }: SeatSelectorProps) {
       totalPrice,
     };
 
-    sessionStorage.setItem('cinemago_checkout', JSON.stringify(checkoutData));
+    setBookingState(checkoutData);
     router.push('/checkout');
   };
 
