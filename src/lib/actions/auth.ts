@@ -27,83 +27,117 @@ function safeCallbackUrl(callbackUrl: string | null): string {
   return '/';
 }
 
+function isRedirectError(err: unknown): boolean {
+  if (typeof err === 'object' && err !== null && 'digest' in err) {
+    const digest = (err as { digest?: string }).digest;
+    if (typeof digest === 'string' && digest.startsWith('NEXT_REDIRECT')) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export async function registerAction(
   _prevState: AuthFormState,
   formData: FormData
 ): Promise<AuthFormState> {
-  const name = ((formData.get('name') as string) ?? '').trim();
-  const email = ((formData.get('email') as string) ?? '').trim();
-  const password = (formData.get('password') as string) ?? '';
+  try {
+    const name = ((formData.get('name') as string) ?? '').trim();
+    const email = ((formData.get('email') as string) ?? '').trim();
+    const password = (formData.get('password') as string) ?? '';
 
-  if (!name || !email || !password) {
-    return { error: 'กรอกข้อมูลให้ครบทุกช่อง' };
+    if (!name || !email || !password) {
+      return { error: 'กรอกข้อมูลให้ครบทุกช่อง' };
+    }
+    if (password.length < 6) {
+      return { error: 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร' };
+    }
+
+    const existingUser = await findUserByEmail(email);
+    if (existingUser) {
+      return { error: 'อีเมลนี้มีผู้ใช้งานแล้ว' };
+    }
+
+    const newUser: User = {
+      id: crypto.randomUUID(),
+      email,
+      password: await hashPassword(password),
+      name,
+    };
+
+    const users = await getUsers();
+    users.push(newUser);
+    await saveUsers(users);
+
+    redirect('/login');
+  } catch (err) {
+    if (isRedirectError(err)) {
+      throw err;
+    }
+    console.error('registerAction error:', err);
+    return { error: err instanceof Error ? err.message : 'เกิดข้อผิดพลาดในการสมัครสมาชิก กรุณาลองใหม่อีกครั้ง' };
   }
-  if (password.length < 6) {
-    return { error: 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร' };
-  }
-
-  const existingUser = await findUserByEmail(email);
-  if (existingUser) {
-    return { error: 'อีเมลนี้มีผู้ใช้งานแล้ว' };
-  }
-
-  const newUser: User = {
-    id: crypto.randomUUID(),
-    email,
-    password: await hashPassword(password),
-    name,
-  };
-
-  const users = await getUsers();
-  users.push(newUser);
-  await saveUsers(users);
-
-  redirect('/login');
 }
 
 export async function loginAction(
   _prevState: AuthFormState,
   formData: FormData
 ): Promise<AuthFormState> {
-  const email = ((formData.get('email') as string) ?? '').trim();
-  const password = (formData.get('password') as string) ?? '';
-  const callbackUrl = safeCallbackUrl(formData.get('callbackUrl') as string | null);
+  try {
+    const email = ((formData.get('email') as string) ?? '').trim();
+    const password = (formData.get('password') as string) ?? '';
+    const callbackUrl = safeCallbackUrl(formData.get('callbackUrl') as string | null);
 
-  if (!email || !password) {
-    return { error: 'กรอกข้อมูลให้ครบทุกช่อง' };
+    if (!email || !password) {
+      return { error: 'กรอกข้อมูลให้ครบทุกช่อง' };
+    }
+
+    const user = await findUserByEmail(email);
+    if (!user || !user.password) {
+      return { error: 'ไม่พบบัญชีผู้ใช้นี้' };
+    }
+
+    const isValid = await verifyPassword(password, user.password);
+    if (!isValid) {
+      return { error: 'รหัสผ่านไม่ถูกต้อง' };
+    }
+
+    const cookieStore = await cookies();
+    cookieStore.set(AUTH_COOKIE_NAME, user.id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: SESSION_MAX_AGE,
+      path: '/',
+    });
+
+    // บังคับให้ root layout (Navbar) อ่าน session ใหม่ทันทีหลัง login
+    revalidatePath('/', 'layout');
+
+    redirect(callbackUrl);
+  } catch (err) {
+    if (isRedirectError(err)) {
+      throw err;
+    }
+    console.error('loginAction error:', err);
+    return { error: err instanceof Error ? err.message : 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่อีกครั้ง' };
   }
-
-  const user = await findUserByEmail(email);
-  if (!user || !user.password) {
-    return { error: 'ไม่พบบัญชีผู้ใช้นี้' };
-  }
-
-  const isValid = await verifyPassword(password, user.password);
-  if (!isValid) {
-    return { error: 'รหัสผ่านไม่ถูกต้อง' };
-  }
-
-  const cookieStore = await cookies();
-  cookieStore.set(AUTH_COOKIE_NAME, user.id, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: SESSION_MAX_AGE,
-    path: '/',
-  });
-
-  // บังคับให้ root layout (Navbar) อ่าน session ใหม่ทันทีหลัง login
-  revalidatePath('/', 'layout');
-
-  redirect(callbackUrl);
 }
 
 export async function logoutAction(): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.delete(AUTH_COOKIE_NAME);
+  try {
+    const cookieStore = await cookies();
+    cookieStore.delete(AUTH_COOKIE_NAME);
 
-  // เช่นเดียวกัน: อัปเดต Navbar ให้กลับสู่สถานะออกจากระบบทันที
-  revalidatePath('/', 'layout');
+    // เช่นเดียวกัน: อัปเดต Navbar ให้กลับสู่สถานะออกจากระบบทันที
+    revalidatePath('/', 'layout');
 
-  redirect('/login');
+    redirect('/login');
+  } catch (err) {
+    if (isRedirectError(err)) {
+      throw err;
+    }
+    console.error('logoutAction error:', err);
+  }
 }
+
